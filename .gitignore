@@ -49,8 +49,11 @@ coverage*.txt
 !/inputs/README.md
 !/inputs/apk/
 !/inputs/apk/SHA256SUMS
+# 解包反编译产物：decoded / decoded-single / decoded.bak-* 等全部不纳入版本管理。
 /client/decoded/
 /client/decoded-single/
+/client/decoded*/
+/client/decoded.*/
 /client/android-bootstrap/aar/
 /client/android-bootstrap/classes/
 /client/android-bootstrap/dex/

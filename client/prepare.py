@@ -62,11 +62,18 @@ def main():
     ET.register_namespace("android", "http://schemas.android.com/apk/res/android")
     tree.write(manifest, encoding="utf-8", xml_declaration=True)
     gsp = source / "assets/gsp.txt"
-    fields = gsp.read_text().strip().split(";")
+    # 二进制读写：Windows 的文本模式会把 "\n" 翻译成 "\r\n"，使 gsp 末字段带上
+    # 尾部 CR。客户端按 ";" 切分后末字段为 "true\r"，配置解析异常会表现为
+    # 卡在“数据解压中”。原包该文件本无换行，此处统一按 LF 落盘。
+    fields = gsp.read_bytes().decode("utf-8").strip().split(";")
     if len(fields) != 10:
         raise SystemExit("gsp字段形状已变化；停止，不修改DLL")
     fields[5] = args.server_host
-    gsp.write_text(";".join(fields)+"\n")
+    # 第8字段(0-based index 7)控制是否启用 UC SDK 登录：国服原版为 true，
+    # 但在模拟器/测试机上 UC SDK 登录流程被阉割后无法完成，导致登录按钮点击
+    # 后无任何请求发出。mac 可玩包为 false，走游客快速登录(heQuickLogin)。
+    fields[7] = "false"
+    gsp.write_bytes((";".join(fields)+"\n").encode("utf-8"))
     print("准备完成：client/decoded；只改Manifest与服务入口，未重建或签名APK")
 
 
